@@ -22,7 +22,7 @@ function Obstacle(minWidth, minHeight, maxWidth, maxHeight){
 	}
 
 	this.minWidth = (minWidth != undefined ? minWidth : 3);
-	this.minHeight = (minHeight != undefined ? minHeight : 1);
+	this.minHeight = (minHeight != undefined ? minHeight : 2);
 	
 	// If randomSize == true these 2 attributes should not make any difference in execution
 	this.maxWidth = (maxWidth != undefined ? maxWidth : 9);

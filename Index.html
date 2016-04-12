@@ -2,41 +2,86 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8" />
-	<title> Arena - Combat Mechanics </title>
+	<title>Arena - Combat Mechanics</title>
 	<script type="text/javascript" src="js/phaser.js"></script>
 	<script type="text/javascript" src="Player.js"></script>
 	<script type="text/javascript" src="Bullet.js"></script>
 	<script type="text/javascript" src="Enemy.js"></script>
 	<script type="text/javascript" src="HealthBar.js"></script>
 	<script type="text/javascript" src="Obstacle.js"></script>
-	<script type="text/javascript" src="Items.js"></script>
+	<script type="text/javascript" src="HealthPotion.js"></script>
 	<script type="text/javascript">
 
 		var game = new Phaser.Game(1280, 720, Phaser.AUTO, 'game', { preload: preload, create: create, update: update });
+		var cursor;		// input listener
 
+		// --- Obstacles
 		var obstaclesAmt = 3;
-		var player, enemy, items;
-		var cursor;
 		var obstacles = [];
 		var obstacleCollisionGroup; 	// The collision group for the walls
-		var playerHP;
-		var healthPotion = 5;
+		// Positioning
+		var obstaclesMinY = 250;
+		var obstaclesMaxY = 500;
+		// Size
+		var obstaclesMinWidth = 3;
+		var obstaclesMinHeight = 2;
+		var obstaclesMaxWidth = 9;
+		var obstaclesMaxHeight = 4;
+
+		// --- Heath Potion
+		var healthPotion; 		// The object
+		var HPamt = 5;
+		var HPheal = 25;
+		var HPcooldown = 100;
+
+		// --- Player
+		var player; 			// The object
+		var playerHP;			// Life bar object
+		var playerYposition = 600;
+		var playerHealthPoints = 100;
+		var playerXvelocity = 240;
+		var playerShootingCD = 50;
+		var playerDashCD = 80;
+		// The player Bullet
+		var playerBulletType = "normal"; 	// This can assume the values: normal, fire, electric, acid, ice, or *the one I didn't understand*  
+		var playerBulletSpread = 1;			// 1, 2, 4, 6, or 8
+		var playerBulletVelocity = -1200;
+		var playerBulletDamage = 1;
+
+		// --- Enemy
+		var enemy = []; 		// The object
+		var enemyHP;			// Life bar object
+		var enemyAmt = 1;			// TODO
+		var enemyHealthPoints = 12;
+		var enemyMinYPosition = 100;
+		var enemyMaxYPosition = 400;
+		// The arrays refer to things that can change by the level of difficulty of the enemy
+		var enemyLvlChange = [80, 20, 0]; 	// The level is activated if life is bigger than __%
+		var enemyXvelocity = [120, 180, 240];
+		var enemyShootingCD = [50, 80, 200];
+		var enemyEvasion = [0, 1, 2]; 		// Refers to the level of evasion: 0: No evasion; 1: Dash; 2 - Dash + Defensive Movement
+		var enemyDashCD = 200;
+		// The enemy Bullet
+		var enemyBulletDamage = 12;
+		var enemyBulletVelocity = 1200;
+
 
 		function preload(){
 			game.load.spritesheet('wall','assets/wall.png',32,32);
 
-			items = new Items();
+			healthPotion = new HealthPotion(HPamt, HPheal, HPcooldown);
 
 			playerHP = new HealthBar(game.world.width - 450, 50, 400, 30);
 			playerBullet = new Bullet();
-			playerBullet.setSpread(true, 8);
-			player = new Player();
+			playerBullet.setSpread(playerBulletSpread);
+			playerBullet.setType(playerBulletType);
+			player = new Player(playerHealthPoints, playerXvelocity, playerDashCD, playerShootingCD);
 			
 			enemyHP = new HealthBar(game.world.width - 450, 200, 64, 5);
 			enemyHP.setBorder('none');
 			enemyHP.setSingleColor('#ff0000');
 			enemyBullet = new Bullet();
-			enemy = new Enemy();
+			enemy = new Enemy(enemyHealthPoints, enemyMinYPosition, enemyMaxYPosition, enemyDashCD);
 		}
 
 		function create(){
@@ -55,7 +100,7 @@
 			player.update();
 			enemy.update();
 
-			items.checkItems();
+			healthPotion.update();
 
 			checkCollisions();
 
@@ -73,12 +118,12 @@
 			obstacleCollisionGroup.physicsBodyType = Phaser.Physics.ARCADE;
 
 			for (var k = 0; k < amt; k++) {
-				y = randomNumber(game.world.height-450, game.world.height-250);
+				y = randomNumber(obstaclesMinY, obstaclesMaxY);
 
-				obstacles[k] = new Obstacle();
-				obstacles[k].create(x, y);
+				obstacles[k] = new Obstacle(obstaclesMinWidth, obstaclesMinHeight, obstaclesMaxWidth, obstaclesMaxHeight);
+				obstacles[k].create(x,y);
 
-				x += 1280 / amt;
+				x += game.world.width / amt;
 			}
 
 		}
@@ -112,17 +157,18 @@
 			}
 		}
 
-
+		// Player hits enemy
 		function hitEnemy(x, bullet){
 			//console.log("hit");
 			bullet.kill();
-			enemy.damage(1);
+			enemy.damage(playerBulletDamage);
 		}
 
+		// Enemy hits player
 		function hitPlayer(x, bullet){
 			//console.log("hit");
 			bullet.kill();
-			player.damage(12);
+			player.damage(enemyBulletDamage);
 		}
 
 		function hitWall(wall, bullet){

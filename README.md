@@ -1,2 +1,2 @@
-# Arena Combat Prototype
+# Arena - Combat Prototype
 

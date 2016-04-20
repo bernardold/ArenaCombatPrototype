@@ -4,18 +4,19 @@ Player class
 
 */
 
-function Player(){
+function Player(hp, velocityX, dashCD, shootCD){
 	// Attributes
-	this.hp = 100;
-	this.maxHP = 100;
+	this.hp = hp;
+	this.maxHP = hp;
 	// Basic movement controls
-	this.velocityX = 240;
+	this.velocityX = velocityX;
 	this.velocityY = 0;
-	this.shootCooldown = 50;
+	this.shootCooldown = shootCD;
 	this.lastY = 1;
 	// Dash basic controls
 	this.dashVelocity = 3500;
-	this.dashCooldown = 0;
+	this.dashCooldownTime = dashCD;
+	this.dashCooldown
 	this.lastPressedRight = 0;
 	this.lastPressedLeft = 0;
 	// Fixing dash variables
@@ -30,14 +31,16 @@ function Player(){
 
 
 Player.prototype.create = function(){
-	this.sprite = game.add.sprite(50, game.world.height-100, 'player');		// Placing player sprite
+	this.sprite = game.add.sprite(50, playerYposition, 'player');		// Placing player sprite
 	this.lastY = game.world.height-100;
 	// Setting Physics
 	game.physics.arcade.enable(this.sprite);
 	this.sprite.body.collideWorldBounds = true;								// World limit
 
-	playerBullet.create(0,-1200);
+	playerBullet.create(0,playerBulletVelocity);
 	playerBullet.setCooldown(this.shootCooldown);
+
+	this.dashCooldown = this.dashCooldownTime;
 }
 
 Player.prototype.update = function(){
@@ -45,7 +48,7 @@ Player.prototype.update = function(){
 	// Updating control variables
 	// Updating cooldowns
 	playerBullet.updateCooldown();
-	if (this.dashCooldown > 0) this.dashCooldown--;
+	if (this.dashCooldown < this.dashCooldownTime) this.dashCooldown++;
 	// Updating timers
 	if (this.lastPressedLeft > 0) this.lastPressedLeft--;
 	if (this.lastPressedRight > 0) this.lastPressedRight--;
@@ -64,10 +67,10 @@ Player.prototype.update = function(){
 	// Left movement
 	if (cursor.left.isDown){
 		// Dash Left condition
-		// test cooldown, test two consequent pushes, test is the pushes were wuick enough
-		if (this.secondRelease && this.dashCooldown == 0 && this.lastPressedLeft > 0){
+		// test cooldown, test two consequent pushes, test if the pushes were quick enough
+		if (this.secondRelease && this.dashCooldown >= this.dashCooldownTime && this.lastPressedLeft > 0){
 			this.sprite.body.velocity.x -= this.dashVelocity;
-			this.dashCooldown = 80;
+			this.dashCooldown = 0;
 		} 
 		// Otherwise, just a regular movement to the left
 		else {
@@ -85,9 +88,9 @@ Player.prototype.update = function(){
 	else if (cursor.right.isDown){
 		// Dash Right condition
 		// test cooldown, test two consequent pushes, test is the pushes were wuick enough
-		if (this.secondRelease && this.dashCooldown == 0 && this.lastPressedRight > 0){
+		if (this.secondRelease && this.dashCooldown >= this.dashCooldownTime && this.lastPressedRight > 0){
 			this.sprite.body.velocity.x += this.dashVelocity;
-			this.dashCooldown = 80;
+			this.dashCooldown = 0;
 
 		} 
 		// Otherwise, just a regular movement to the right

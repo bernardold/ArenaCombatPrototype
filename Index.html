@@ -2,146 +2,256 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8" />
-	<title> Arena - Combat Mechanics </title>
+	<title>Arena - Combat Mechanics</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
 	<script type="text/javascript" src="js/phaser.js"></script>
+	<script type="text/javascript" src="Combat.js"></script>
 	<script type="text/javascript" src="Player.js"></script>
 	<script type="text/javascript" src="Bullet.js"></script>
 	<script type="text/javascript" src="Enemy.js"></script>
 	<script type="text/javascript" src="HealthBar.js"></script>
 	<script type="text/javascript" src="Obstacle.js"></script>
-	<script type="text/javascript" src="Items.js"></script>
+	<script type="text/javascript" src="HealthPotion.js"></script>
 	<script type="text/javascript">
 
-		var game = new Phaser.Game(1280, 720, Phaser.AUTO, 'game', { preload: preload, create: create, update: update });
+	var combat;
 
-		var obstaclesAmt = 3;
-		var player, enemy, items;
-		var cursor;
-		var obstacles = [];
-		var obstacleCollisionGroup; 	// The collision group for the walls
-		var playerHP;
-		var healthPotion = 5;
+	// --- Obstacles
+	var obstaclesAmt = 3;
+	var obstacles = [];
+	var obstacleCollisionGroup; 	// The collision group for the walls
+	// Positioning
+	var obstaclesMinY = 250;
+	var obstaclesMaxY = 500;
+	// Size
+	var obstaclesMinWidth = 3;
+	var obstaclesMinHeight = 2;
+	var obstaclesMaxWidth = 9;
+	var obstaclesMaxHeight = 4;
 
-		function preload(){
-			game.load.spritesheet('wall','assets/wall.png',32,32);
+	// --- Heath Potion
+	var healthPotion; 		// The object
+	var HPamt = 5;
+	var HPheal = 25;
+	var HPcooldown = 100;
 
-			items = new Items();
+	// --- Player
+	var player; 			// The object
+	var playerHP;			// Life bar object
+	var playerYposition = 600;
+	var playerHealthPoints = 100;
+	var playerXvelocity = 240;
+	var playerShootingCD = 50;
+	var playerDashCD = 80;
+	// The player Bullet
+	var playerBulletType = "normal"; 	// This can assume the values: normal, fire, electric, acid, ice, or amor piercing  
+	var playerBulletSpread = 1;			// 1, 2, 4, 6, or 8
+	var playerBulletVelocity = -1200;
+	var playerBulletDamage = 1;
 
-			playerHP = new HealthBar(game.world.width - 450, 50, 400, 30);
-			playerBullet = new Bullet();
-			playerBullet.setSpread(true, 8);
-			player = new Player();
-			
-			enemyHP = new HealthBar(game.world.width - 450, 200, 64, 5);
-			enemyHP.setBorder('none');
-			enemyHP.setSingleColor('#ff0000');
-			enemyBullet = new Bullet();
-			enemy = new Enemy();
-		}
+	// --- Enemy
+	var enemy = []; 		// The object
+	var enemyHP;			// Life bar object
+	var enemyAmt = 1;			// TODO
+	var enemyHealthPoints = 12;
+	var enemyMinYPosition = 100;
+	var enemyMaxYPosition = 400;
+	// The arrays refer to things that can change by the level of difficulty of the enemy
+	var enemyLvlChange = [80, 20, 0]; 	// The level is activated if life is bigger than __%
+	var enemyXvelocity = [120, 180, 240];
+	var enemyShootingCD = [50, 80, 200];
+	var enemyEvasion = [0, 1, 2]; 		// Refers to the level of evasion: 0: No evasion; 1: Dash; 2 - Dash + Defensive Movement
+	var enemyDashCD = 200;
+	// The enemy Bullet
+	var enemyBulletDamage = 12;
+	var enemyBulletVelocity = 1200;
 
-		function create(){
-			game.physics.startSystem(Phaser.Physics.ARCADE);					// Adding Arcade physics system
-			game.stage.backgroundColor = '#87ceeb';
+	$(document).ready(function(){
+		// Filling the text fields with default values
 
-			player.create();
-			enemy.create();
+		// Obstacles
+		$("#obstaclesAmt").val(obstaclesAmt);
+		$("#obstaclesMinY").val(obstaclesMinY);
+		$("#obstaclesMaxY").val(obstaclesMaxY);
+		$("#obstaclesMinWidth").val(obstaclesMinWidth);
+		$("#obstaclesMinHeight").val(obstaclesMinHeight);
+		$("#obstaclesMaxWidth").val(obstaclesMinWidth);
+		$("#obstaclesMaxHeight").val(obstaclesMinHeight);
 
-			cursor = game.input.keyboard.createCursorKeys();					// Setting the controls
+		// Health Potions
+		$("#HPamt").val(HPamt);
+		$("#HPheal").val(HPheal);
+		$("#HPcooldown").val(HPcooldown);
 
-			generateObstacle(obstaclesAmt);
-		}
+		// Player
+		$("#playerYposition").val(playerYposition);
+		$("#playerHealthPoints").val(playerHealthPoints);
+		$("#playerXvelocity").val(playerXvelocity);
+		$("#playerShootingCD").val(playerShootingCD);
+		$("#playerDashCD").val(playerDashCD);
+		//$("#playerBulletType").val(playerBulletType);
+		//$("#playerBulletSpread").val(playerBulletSpread);
+		$("#playerBulletVelocity").val(playerBulletVelocity);
+		$("#playerBulletDamage").val(playerBulletDamage);
 
-		function update(){
-			player.update();
-			enemy.update();
+		// Enemy
+		$("#enemyAmt").val(enemyAmt);
+		$("#enemyHealthPoints").val(enemyHealthPoints);
+		$("#enemyMinYPosition").val(enemyMinYPosition);
+		$("#enemyMaxYPosition").val(enemyMaxYPosition);
+		$(".enemyLvlChange0").val(enemyLvlChange[0]);
+		$(".enemyLvlChange1").val(enemyLvlChange[1]);
+		$(".enemyLvlChange2").val(enemyLvlChange[2]);
 
-			items.checkItems();
+		$(".enemyXvelocity0").val(enemyXvelocity[0]);
+		$(".enemyXvelocity1").val(enemyXvelocity[1]);
+		$(".enemyXvelocity2").val(enemyXvelocity[2]);
 
-			checkCollisions();
+		$(".enemyShootingCD0").val(enemyShootingCD[0]);
+		$(".enemyShootingCD1").val(enemyShootingCD[1]);
+		$(".enemyShootingCD2").val(enemyShootingCD[2]);
 
-			if (playerHP != null) playerHP.update(player.getLife(), player.getMaxLife());
-			if (enemyHP != null) enemyHP.update(enemy.getLife(), enemy.getMaxLife(), enemy.getX(), enemy.getY()-10);
-		}
+		$(".enemyEvasion0").val(enemyEvasion[0]);
+		$(".enemyEvasion1").val(enemyEvasion[1]);
+		$(".enemyEvasion2").val(enemyEvasion[2]);
 
-		function generateObstacle(amt){
-			var x = 100;
-			var y;
+		$("#enemyDashCD").val(enemyDashCD);
+		$("#enemyBulletDamage").val(enemyBulletDamage);
+		$("#enemyBulletVelocity").val(enemyBulletVelocity);
 
-			// Creating the collision group for the obstacles
-			obstacleCollisionGroup = game.add.group();
-			obstacleCollisionGroup.enableBody = true;
-			obstacleCollisionGroup.physicsBodyType = Phaser.Physics.ARCADE;
+	
+		// Listener to start the game
+		$('#play').on('click',function() {
+			//console.log("submit");
+			// Set values
+			obstaclesAmt = $("#obstaclesAmt").val();
+			// Positioning
+			obstaclesMinY = $("#obstaclesMinY").val();
+			obstaclesMaxY = $("#obstaclesMaxY").val();
+			// Size
+			var obstaclesMinWidth = $("#obstaclesMinWidth").val();
+			var obstaclesMinHeight = $("#obstaclesMinHeight").val();
+			var obstaclesMaxWidth = $("#obstaclesMaxWidth").val();
+			var obstaclesMaxHeight = $("#obstaclesMaxHeight").val();
 
-			for (var k = 0; k < amt; k++) {
-				y = randomNumber(game.world.height-450, game.world.height-250);
+			// --- Heath Potion
+			var healthPotion; 		// The object
+			var HPamt = $("#HPamt").val();
+			var HPheal = $("#HPheal").val();
+			var HPcooldown = $("#HPcooldown").val();
 
-				obstacles[k] = new Obstacle();
-				obstacles[k].create(x, y);
+			// --- Player
+			var playerYposition = $("#playerYposition").val();
+			var playerHealthPoints = $("#playerHealthPoints").val();
+			var playerXvelocity = $("#playerXvelocity").val();
+			var playerShootingCD = $("#playerShootingCD").val();
+			var playerDashCD = $("#playerDashCD").val();
+			// The player Bullet
+			var playerBulletType = $("#playerBulletType").val();	// This can assume the values: normal, fire, electric, acid, ice, or amor piercing  
+			var playerBulletSpread = $("#playerBulletSpread").val();			// 1, 2, 4, 6, or 8
+			var playerBulletVelocity = $("#playerBulletVelocity").val();
+			var playerBulletDamage = $("#playerBulletDamage").val();
 
-				x += 1280 / amt;
-			}
+			// --- Enemy
+			var enemyAmt = $("#enemyAmt").val();			// TODO
+			var enemyHealthPoints = $("#enemyHealthPoints").val();
+			var enemyMinYPosition = $("#enemyMinYPosition").val();
+			var enemyMaxYPosition = $("#enemyMaxYPosition").val();
+			// The arrays refer to things that can change by the level of difficulty of the enemy
+			var enemyLvlChange =   [$("#enemyLvlChange0").val(), 
+									$("#enemyLvlChange1").val(),
+									$("#enemyLvlChange2").val()]; 	// The level is activated if life is bigger than __%
+			var enemyXvelocity =   [$("#enemyXvelocity0").val(), 
+									$("#enemyXvelocity1").val(), 
+									$("#enemyXvelocity2").val()];
+			var enemyShootingCD =  [$("#enemyShootingCD0").val(), 
+									$("#enemyShootingCD1").val(), 
+									$("#enemyShootingCD2").val()];
+			var enemyEvasion = [$("#enemyEvasion0").val(), 
+								$("#enemyEvasion1").val(), 
+								$("#enemyEvasion2").val()]; 		// Refers to the level of evasion: 0: No evasion; 1: Dash; 2 - Dash + Defensive Movement
+			var enemyDashCD = $("#enemyDashCD").val();
+			// The enemy Bullet
+			var enemyBulletDamage = $("#enemyBulletDamage").val();
+			var enemyBulletVelocity = $("#enemyBulletVelocity").val();
 
-		}
+			// Clean the form
+			$("#form").empty();
 
-
-		function checkCollisions(){
-			// Try to detect the collision, but if any of the objects is null, just ignore
-			try {
-				// Player hits wall
-				game.physics.arcade.collide(obstacleCollisionGroup, playerBullet.collisionGroup(), hitWall);
-				// Enemy hits wall
-				game.physics.arcade.collide(obstacleCollisionGroup, enemyBullet.collisionGroup(), hitWall);
-			} catch (err) {
-				console.log(err.message);
-			}
-
-			// Again, the same thing
-			try {
-				// Player hits enemy
-				game.physics.arcade.collide(enemy.collisionGroup(), playerBullet.collisionGroup(), hitEnemy);
-			} catch (err) {
-				console.log(err.message);
-			}
-
-			// Again, the same thing
-			try {
-				// Enemy hits player
-				game.physics.arcade.collide(player.collisionGroup(), enemyBullet.collisionGroup(), hitPlayer);
-			} catch (err) {
-				console.log(err.message);
-			}
-		}
-
-
-		function hitEnemy(x, bullet){
-			//console.log("hit");
-			bullet.kill();
-			enemy.damage(1);
-		}
-
-		function hitPlayer(x, bullet){
-			//console.log("hit");
-			bullet.kill();
-			player.damage(12);
-		}
-
-		function hitWall(wall, bullet){
-			bullet.kill();
-
-			wall.health--;
-			if (wall.health < 0) wall.destroy();
-			else wall.frame = wall.health;
-
-		}
-
-		function randomNumber (min,max){
-		    return Math.floor(Math.random()*(max-min+1)+min);
-		}
-
-
+			// Create the game
+			game = new Phaser.Game(1280, 720, Phaser.AUTO, 'game', { preload: this.preload, create: this.create, update: this.update });
+			// add the game state to the state manager
+			game.state.add('combat', Combat);
+			// and start the game
+			game.state.start('combat');
+		});
+	});
 	</script>
 </head>
 <body>
 	<div id="game"></div>
+
+	<div id="form">
+
+			Obstacles: <br>
+				Amount <input type="text" id="obstaclesAmt"><br>
+				Positioning <br>
+				Minimum Y <input type="text" id="obstaclesMinY"><br>
+				Maximum Y <input type="text" id="obstaclesMaxY"><br>
+				Size <br>
+				Minimum Size <input type="text" id="obstaclesMinWidth"> x <input type="text" id="obstaclesMinHeight"><br>
+				Maximum Size <input type="text" id="obstaclesMaxWidth"> x <input type="text" id="obstaclesMaxHeight"><br><br>
+
+			Health Potions: <br>
+				Amount <input type="text" id="HPamt"><br>
+				Heal <input type="text" id="HPheal"><br>
+				Cooldown <input type="text" id="HPcooldown"><br><br>
+
+			Player: <br>
+				Y position <input type="text" id="playerYposition"><br>
+				Velocity <input type="text" id="playerXvelocity"><br> 
+				Health Points <input type="text" id="playerHealthPoints"><br>
+				Dash cooldown <input type="text" id="playerDashCD"><br>
+				Shooting <br>
+				Cooldown <input type="text" id="playerShootingCD"><br>
+				Type <select id="playerBulletSpread">
+							<option value="normal">normal</option>
+							<option value="fire">fire</option>
+							<option value="electric">electric</option>
+							<option value="acid">acid</option>
+							<option value="ice">ice</option>
+							<option value="amor piercing">amor piercing</option>
+						</select><br>
+				Spread <select id="playerBulletSpread">
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="4">4</option>
+							<option value="6">6</option>
+							<option value="8">8</option>
+						</select><br>
+				Velocity <input type="text" id="playerBulletVelocity"><br>
+				Damage <input type="text" id="playerBulletDamage"><br><br>
+
+			Enemy: <br>
+				Amount <input type="text" id="enemyAmt"><br>
+				Health Points <input type="text" id="enemyHealthPoints"><br>
+				Positioning <br>
+				Minimum Y <input type="text" id="enemyMinYPosition"><br>
+				Maximum Y <input type="text" id="enemyMaxYPosition"><br>
+				Per level
+				Activate Level when life greater than __% <input type="text" class="enemyLvlChange0"><input type="text" class="enemyLvlChange1"><input type="text" class="enemyLvlChange2"><br>
+				X Velocity <input type="text" class="enemyXvelocity0"><input type="text" class="enemyXvelocity1"><input type="text" class="enemyXvelocity2"><br>
+				Shooting cooldown <input type="text" class="enemyShootingCD0"><input type="text" class="enemyShootingCD1"><input type="text" class="enemyShootingCD2"><br>
+				Evasion <input type="text" class="enemyEvasion0"><input type="text" class="enemyEvasion1"><input type="text" class="enemyEvasion2"><br>
+				Dash Cooldown <input type="text" id="enemyDashCD"><br>
+				Bullet Damage <input type="text" id="enemyBulletDamage"><br>
+				Bullet Velocity <input type="text" id="enemyBulletVelocity"><br>
+
+				
+
+			<button id="play">Play</button>
+
+	</div>
+
 </body>
 </html>

@@ -3,24 +3,27 @@
 Enemy class
 
 
-	difficulty 1  	Slow movement 200
+	difficulty 0  	Slow movement 120
 					Fast attack 50
 					No evasion
 
-	difficulty 2  	Faster movement 
+	difficulty 1  	Faster movement 180
 					Slower attack 80
 					Some evasion
 
-	difficulty 3  	Faster movement
+	difficulty 2  	Faster movement 240
 					Slower attack 200
 					Focus evasion
 */
 
-function Enemy(){
+function Enemy(hp, minYposition, maxYposition, dashCD){
 	// Attributes
-	this.hp = 12;
-	this.maxHP = 12;
-	this.difficulty = 1;
+	this.hp = hp;
+	this.maxHP = hp;
+	this.difficulty = 0;
+	this.evasionLvl = 0;
+	this.minYposition = minYposition
+	this.maxYposition = maxYposition
 	// Basic movement controls
 	this.velocityX = 200;
 	this.velocityY = 100;
@@ -31,7 +34,7 @@ function Enemy(){
 	this.shootCooldown = 50;
 	// Dash basic controls
 	this.dashVelocity = 4000;
-	this.dashCooldownTime = 200;
+	this.dashCooldownTime = dashCD;
 	this.dashCooldown;
 	// Aesthetic
 	this.sprite;
@@ -66,7 +69,7 @@ Enemy.prototype.create = function(){
 	this.dashCooldown = this.dashCooldownTime;
 	this.changeCooldown = this.changeCooldownTime;
 
-	enemyBullet.create(0,1200);
+	enemyBullet.create(0,enemyBulletVelocity);
 }
 
 Enemy.prototype.update = function(){
@@ -76,9 +79,9 @@ Enemy.prototype.update = function(){
 	if (this.dashCooldown < this.dashCooldownTime) this.dashCooldown++;
  
 	// Level picking
-	if (this.hp >= 8) this.difficulty = 1;
-	else if (this.hp >= 4) this.difficulty = 2;
-	else if (this.hp >= 1) this.difficulty = 3;
+	for (var i = 2; i >= 0; i--) {
+		if ((100 * this.hp) / this.maxHP >= enemyLvlChange[i]) this.difficulty = i;
+	}
 
 	// General behavior. Happens independent of the difficulty 
 
@@ -113,39 +116,31 @@ Enemy.prototype.update = function(){
 	}
 
 	// Specific behaviors. Defined by the difficulty
+	this.velocityX = enemyXvelocity[this.difficulty];
+	this.shootCooldown = enemyShootingCD[this.difficulty];
+	enemyBullet.setCooldown(this.shootCooldown);
 
-	if (this.difficulty == 1){
-		this.velocityX = 120;
-		this.shootCooldown = 50;
-		enemyBullet.setCooldown(this.shootCooldown);
+	this.evasionLvl = enemyEvasion[this.difficulty];
 
+	if (this.evasionLvl == 0){
 		// Just basic movements
 		this.regularMovement();
 		// No Dash
 	}
-	else if (this.difficulty == 2){
-		this.velocityX = 180;
-		this.shootCooldown = 80;
-		enemyBullet.setCooldown(this.shootCooldown);
-
+	else if (this.evasionLvl == 1){
 		// Basic movements
 		this.regularMovement();
 		// Dash
 		game.physics.arcade.overlap(this.dummySprite, playerBullet.collisionGroup(), this.checkDash, null, this);
 	}
-	else if (this.difficulty == 3){
-		this.velocityX = 240;
-		this.shootCooldown = 200;
-		enemyBullet.setCooldown(this.shootCooldown);
-
+	else if (this.evasionLvl == 2){
 		// Defensive movement
 		this.defensiveMovement();
 		// Dash
 		game.physics.arcade.overlap(this.dummySprite, playerBullet.collisionGroup(), this.checkDash, null, this);
-	}
-	else {
-		// Should never reach this
-	}
+		}
+	else { /* Should never reach this point */}
+
 }
 
 Enemy.prototype.regularMovement = function(){
@@ -196,7 +191,7 @@ Enemy.prototype.defensiveMovement = function(){
 		// Randomize and X position behind the wall
 		this.safeX = randomNumber(this.minX, (this.maxX - player.sprite.width));
 
-		console.log(this.minX+" <-> "+this.maxX);
+		//console.log(this.minX+" <-> "+this.maxX);
 		this.changeCooldown = 0;
 	}
 	else {

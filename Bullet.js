@@ -15,6 +15,8 @@ function Bullet(){
 	this.bulletsAmt = 1;
 	this.minSpread = 0;
 	this.maxSpread = 0;
+	// type of bullet
+	this.bulletType;
 	// Aesthetic
 	this.sprite = new Array();
 	game.load.image('bullet','assets/bullet.png');
@@ -58,11 +60,14 @@ Bullet.prototype.setCooldown = function(cd){
 	this.cooldownTime = cd;
 }
 
-Bullet.prototype.setSpread = function(state, amt){
-	this.spread = state;
+Bullet.prototype.setSpread = function(amt){
+	this.spread = (amt != 1);
 
-	if (!state) this.bulletsAmt = 1;
-	else this.bulletsAmt = amt;
+	this.bulletsAmt = amt;
+}
+
+Bullet.prototype.setType = function(type){
+	this.bulletType = type;
 }
 
 Bullet.prototype.collisionGroup = function(){

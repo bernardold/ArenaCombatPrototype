@@ -75,8 +75,8 @@
 		$("#obstaclesMaxY").val(obstaclesMaxY);
 		$("#obstaclesMinWidth").val(obstaclesMinWidth);
 		$("#obstaclesMinHeight").val(obstaclesMinHeight);
-		$("#obstaclesMaxWidth").val(obstaclesMinWidth);
-		$("#obstaclesMaxHeight").val(obstaclesMinHeight);
+		$("#obstaclesMaxWidth").val(obstaclesMaxWidth);
+		$("#obstaclesMaxHeight").val(obstaclesMaxHeight);
 
 		// Health Potions
 		$("#HPamt").val(HPamt);
@@ -124,56 +124,56 @@
 		$('#play').on('click',function() {
 			//console.log("submit");
 			// Set values
-			obstaclesAmt = $("#obstaclesAmt").val();
+			obstaclesAmt = parseInt($("#obstaclesAmt").val());
 			// Positioning
-			obstaclesMinY = $("#obstaclesMinY").val();
-			obstaclesMaxY = $("#obstaclesMaxY").val();
+			obstaclesMinY = parseInt($("#obstaclesMinY").val());
+			obstaclesMaxY = parseInt($("#obstaclesMaxY").val());
 			// Size
-			var obstaclesMinWidth = $("#obstaclesMinWidth").val();
-			var obstaclesMinHeight = $("#obstaclesMinHeight").val();
-			var obstaclesMaxWidth = $("#obstaclesMaxWidth").val();
-			var obstaclesMaxHeight = $("#obstaclesMaxHeight").val();
+			obstaclesMinWidth = parseInt($("#obstaclesMinWidth").val());
+			obstaclesMinHeight = parseInt($("#obstaclesMinHeight").val());
+			obstaclesMaxWidth = parseInt($("#obstaclesMaxWidth").val());
+			obstaclesMaxHeight = parseInt($("#obstaclesMaxHeight").val());
 
 			// --- Heath Potion
-			var healthPotion; 		// The object
-			var HPamt = $("#HPamt").val();
-			var HPheal = $("#HPheal").val();
-			var HPcooldown = $("#HPcooldown").val();
+			healthPotion; 		// The object
+			HPamt = parseInt($("#HPamt").val());
+			HPheal = parseInt($("#HPheal").val());
+			HPcooldown = parseInt($("#HPcooldown").val());
 
 			// --- Player
-			var playerYposition = $("#playerYposition").val();
-			var playerHealthPoints = $("#playerHealthPoints").val();
-			var playerXvelocity = $("#playerXvelocity").val();
-			var playerShootingCD = $("#playerShootingCD").val();
-			var playerDashCD = $("#playerDashCD").val();
+			playerYposition = parseInt($("#playerYposition").val());
+			playerHealthPoints = parseInt($("#playerHealthPoints").val());
+			playerXvelocity = parseInt($("#playerXvelocity").val());
+			playerShootingCD = parseInt($("#playerShootingCD").val());
+			playerDashCD = parseInt($("#playerDashCD").val());
 			// The player Bullet
-			var playerBulletType = $("#playerBulletType").val();	// This can assume the values: normal, fire, electric, acid, ice, or amor piercing  
-			var playerBulletSpread = $("#playerBulletSpread").val();			// 1, 2, 4, 6, or 8
-			var playerBulletVelocity = $("#playerBulletVelocity").val();
-			var playerBulletDamage = $("#playerBulletDamage").val();
+			playerBulletType = $("#playerBulletType").val();	// This can assume the values: normal, fire, electric, acid, ice, or amor piercing  
+			playerBulletSpread = parseInt($("#playerBulletSpread").val());			// 1, 2, 4, 6, or 8
+			playerBulletVelocity = parseInt($("#playerBulletVelocity").val());
+			playerBulletDamage = parseInt($("#playerBulletDamage").val());
 
 			// --- Enemy
-			var enemyAmt = $("#enemyAmt").val();			// TODO
-			var enemyHealthPoints = $("#enemyHealthPoints").val();
-			var enemyMinYPosition = $("#enemyMinYPosition").val();
-			var enemyMaxYPosition = $("#enemyMaxYPosition").val();
-			// The arrays refer to things that can change by the level of difficulty of the enemy
-			var enemyLvlChange =   [$("#enemyLvlChange0").val(), 
-									$("#enemyLvlChange1").val(),
-									$("#enemyLvlChange2").val()]; 	// The level is activated if life is bigger than __%
-			var enemyXvelocity =   [$("#enemyXvelocity0").val(), 
-									$("#enemyXvelocity1").val(), 
-									$("#enemyXvelocity2").val()];
-			var enemyShootingCD =  [$("#enemyShootingCD0").val(), 
-									$("#enemyShootingCD1").val(), 
-									$("#enemyShootingCD2").val()];
-			var enemyEvasion = [$("#enemyEvasion0").val(), 
-								$("#enemyEvasion1").val(), 
-								$("#enemyEvasion2").val()]; 		// Refers to the level of evasion: 0: No evasion; 1: Dash; 2 - Dash + Defensive Movement
-			var enemyDashCD = $("#enemyDashCD").val();
+			enemyAmt = parseInt($("#enemyAmt").val());			// TODO
+			enemyHealthPoints = parseInt($("#enemyHealthPoints").val());
+			enemyMinYPosition = parseInt($("#enemyMinYPosition").val());
+			enemyMaxYPosition = parseInt($("#enemyMaxYPosition").val());
+			// // The arrays refer to things that can change by the level of difficulty of the enemy
+			enemyLvlChange =   [parseInt($(".enemyLvlChange0").val()), 
+								parseInt($(".enemyLvlChange1").val()),
+								parseInt($(".enemyLvlChange2").val())]; 	// The level is activated if life is bigger than __%
+			enemyXvelocity =   [parseInt($(".enemyXvelocity0").val()),
+								parseInt($(".enemyXvelocity1").val()),
+								parseInt($(".enemyXvelocity2").val())];
+			enemyShootingCD =  [parseInt($(".enemyShootingCD0").val()), 
+								parseInt($(".enemyShootingCD1").val()), 
+								parseInt($(".enemyShootingCD2").val())];
+			enemyEvasion = [parseInt($(".enemyEvasion0").val()), 
+							parseInt($(".enemyEvasion1").val()), 
+							parseInt($(".enemyEvasion2").val())]; 		// Refers to the level of evasion: 0: No evasion; 1: Dash; 2 - Dash + Defensive Movement
+			enemyDashCD = parseInt($("#enemyDashCD").val());
 			// The enemy Bullet
-			var enemyBulletDamage = $("#enemyBulletDamage").val();
-			var enemyBulletVelocity = $("#enemyBulletVelocity").val();
+			enemyBulletDamage = parseInt($("#enemyBulletDamage").val());
+			enemyBulletVelocity = parseInt($("#enemyBulletVelocity").val());
 
 			// Clean the form
 			$("#form").empty();

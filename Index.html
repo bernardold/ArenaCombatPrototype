@@ -148,7 +148,8 @@
 			playerDashCD = parseInt($("#playerDashCD").val());
 			// The player Bullet
 			playerBulletType = $("#playerBulletType").val();	// This can assume the values: normal, fire, electric, acid, ice, or amor piercing  
-			playerBulletSpread = parseInt($("#playerBulletSpread").val());			// 1, 2, 4, 6, or 8
+			playerBulletSpread = $("#playerBulletSpread").val();			// 1, 2, 4, 6, or 8
+			console.log(playerBulletSpread);
 			playerBulletVelocity = parseInt($("#playerBulletVelocity").val());
 			playerBulletDamage = parseInt($("#playerBulletDamage").val());
 
@@ -214,7 +215,7 @@
 				Dash cooldown <input type="text" id="playerDashCD"><br>
 				Shooting <br>
 				Cooldown <input type="text" id="playerShootingCD"><br>
-				Type <select id="playerBulletSpread">
+				Type <select id="playerBulletType">
 							<option value="normal">normal</option>
 							<option value="fire">fire</option>
 							<option value="electric">electric</option>

@@ -179,7 +179,7 @@ Player.prototype.update = function(){
 
 Player.prototype.shoot = function(){
 	// Try to shoot, but interrupt if cooldown is not complete
-	playerBullet.fire(this.getX()+(this.sprite.width/2 - 5), this.getY()-this.sprite.height);
+	playerBullet.fire(this.getX()+(this.sprite.width/2 - 5), this.getY());
 }
 
 Player.prototype.damage = function (dam){

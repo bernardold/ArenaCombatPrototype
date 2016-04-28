@@ -280,6 +280,7 @@ Enemy.prototype.checkDash = function(obj1, obj2){
 			// Set the velocity for the smoke to the right
 			this.maxParticleSpeed = new Phaser.Point(400,200);
   			this.minParticleSpeed = new Phaser.Point(300,-200);
+  			// Position the emitter on the right side of the sprite
     		this.emitter.x = this.sprite.width;
 		}
 		if (side==1){	// Dash to the right
@@ -288,6 +289,7 @@ Enemy.prototype.checkDash = function(obj1, obj2){
 			// Set the velocity for the smoke to the left
 			this.maxParticleSpeed = new Phaser.Point(-300,200);
   			this.minParticleSpeed = new Phaser.Point(-400,-200);
+  			// Position the emitter on the left side of the sprite
     		this.emitter.x = 0;
 		}
 
@@ -307,7 +309,7 @@ Enemy.prototype.checkDash = function(obj1, obj2){
 
 Enemy.prototype.shoot = function(){
 	// Try to shoot, but interrupt if cooldown is not complete
-	if (this.sprite.alive) enemyBullet.fire(this.getX()+(this.sprite.width/2 - 5), this.getY()+this.sprite.height);
+	if (this.sprite.alive) enemyBullet.fire(this.getX()+(this.sprite.width/2 - 5), this.getY()+this.sprite.height-10);
 }
 
 Enemy.prototype.damage = function (dam){

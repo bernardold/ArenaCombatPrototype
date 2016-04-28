@@ -54,13 +54,8 @@ function generateObstacle(amt){
 	obstacleCollisionGroup.enableBody = true;
 	obstacleCollisionGroup.physicsBodyType = Phaser.Physics.ARCADE;
 
-	console.log(obstaclesMinY);
-	console.log(obstaclesMaxY);
-
 	for (var k = 0; k < amt; k++) {
 		y = randomNumber(obstaclesMinY, obstaclesMaxY);
-
-		console.log(y);
 
 		obstacles[k] = new Obstacle(obstaclesMinWidth, obstaclesMinHeight, obstaclesMaxWidth, obstaclesMaxHeight);
 		obstacles[k].create(x,y);

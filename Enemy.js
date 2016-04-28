@@ -36,6 +36,11 @@ function Enemy(hp, minYposition, maxYposition, dashCD){
 	this.dashVelocity = 4000;
 	this.dashCooldownTime = dashCD;
 	this.dashCooldown;
+	// Dash particles stuff
+	game.load.image('smoke','assets/smoke.png');
+	this.emitter;
+	this.maxParticleSpeed;
+	this.minParticleSpeed;
 	// Aesthetic
 	this.sprite;
 	game.load.image('enemy','assets/enemy.png');
@@ -70,6 +75,20 @@ Enemy.prototype.create = function(){
 	this.changeCooldown = this.changeCooldownTime;
 
 	enemyBullet.create(0,enemyBulletVelocity);
+
+	// Set the emitter for the dash
+	this.emitter = game.add.emitter(0, 0, 1000);
+    this.emitter.makeParticles('smoke');
+    // Attach it to the sprite
+    this.sprite.addChild(this.emitter);
+    // Emitter position relative to the sprite
+    this.emitter.x = this.sprite.width/2;
+    this.emitter.y = this.sprite.height/2;
+    // How long the particle lasts
+    this.emitter.lifespan = 300;
+    // Initializing the speed (changed everytime)
+    this.maxParticleSpeed = new Phaser.Point(-300,200);
+  	this.minParticleSpeed = new Phaser.Point(-400,-200);
 }
 
 Enemy.prototype.update = function(){
@@ -250,11 +269,37 @@ Enemy.prototype.processWallCollision = function(sprite, wall){
 }
 
 Enemy.prototype.checkDash = function(obj1, obj2){
+	var particlesAmt;
+
 	if (this.dashCooldown == this.dashCooldownTime){
 
 		var side = randomNumber(0,1);
-		if (side==0)this.sprite.body.velocity.x -= this.dashVelocity;	// Dash to the left
-		if (side==1)this.sprite.body.velocity.x += this.dashVelocity;	// Dash to the right
+		if (side==0){	// Dash to the left
+			this.sprite.body.velocity.x -= this.dashVelocity;
+
+			// Set the velocity for the smoke to the right
+			this.maxParticleSpeed = new Phaser.Point(400,200);
+  			this.minParticleSpeed = new Phaser.Point(300,-200);
+    		this.emitter.x = this.sprite.width;
+		}
+		if (side==1){	// Dash to the right
+			this.sprite.body.velocity.x += this.dashVelocity;
+
+			// Set the velocity for the smoke to the left
+			this.maxParticleSpeed = new Phaser.Point(-300,200);
+  			this.minParticleSpeed = new Phaser.Point(-400,-200);
+    		this.emitter.x = 0;
+		}
+
+		// Apply the velocity to the system
+		this.emitter.maxParticleSpeed = this.maxParticleSpeed;
+  		this.emitter.minParticleSpeed = this.minParticleSpeed;
+		// Emmit particles
+		particlesAmt = randomNumber (5, 10);
+		for (var i = 0; i < particlesAmt; i++) {
+			this.emitter.emitParticle();
+		}
+		
 
 		this.dashCooldown = 0
 	}

@@ -19,6 +19,11 @@ function Player(hp, velocityX, dashCD, shootCD){
 	this.dashCooldown
 	this.lastPressedRight = 0;
 	this.lastPressedLeft = 0;
+	// Dash particles stuff
+	game.load.image('smoke','assets/smoke.png');
+	this.emitter;
+	this.maxParticleSpeed;
+	this.minParticleSpeed;
 	// Fixing dash variables
 	this.tapDuration = 0;			// how long the first tap should be to be considered a tap instead of a long movement
 	this.firstRelease = false;		// flag that guarantee a release before the double-tap, avoiding dash right after a long movement
@@ -41,9 +46,25 @@ Player.prototype.create = function(){
 	playerBullet.setCooldown(this.shootCooldown);
 
 	this.dashCooldown = this.dashCooldownTime;
+
+
+	// Set the emitter for the dash
+	this.emitter = game.add.emitter(0, 0, 1000);
+    this.emitter.makeParticles('smoke');
+    // Attach it to the sprite
+    this.sprite.addChild(this.emitter);
+    // Emitter position relative to the sprite
+    this.emitter.x = this.sprite.width/2;
+    this.emitter.y = this.sprite.height/2;
+    // How long the particle lasts
+    this.emitter.lifespan = 300;
+    // Initializing the speed (changed everytime)
+    this.maxParticleSpeed = new Phaser.Point(-300,200);
+  	this.minParticleSpeed = new Phaser.Point(-400,-200);
 }
 
 Player.prototype.update = function(){
+	var particlesAmt;
 
 	// Updating control variables
 	// Updating cooldowns
@@ -70,6 +91,20 @@ Player.prototype.update = function(){
 		// test cooldown, test two consequent pushes, test if the pushes were quick enough
 		if (this.secondRelease && this.dashCooldown >= this.dashCooldownTime && this.lastPressedLeft > 0){
 			this.sprite.body.velocity.x -= this.dashVelocity;
+
+			// Set the velocity for the smoke to the right
+			this.maxParticleSpeed = new Phaser.Point(400,200);
+  			this.minParticleSpeed = new Phaser.Point(300,-200);
+  			// Apply the velocity to the system
+    		this.emitter.x = this.sprite.width;
+			this.emitter.maxParticleSpeed = this.maxParticleSpeed;
+	  		this.emitter.minParticleSpeed = this.minParticleSpeed;
+			// Emmit particles
+			particlesAmt = randomNumber (5, 10);
+			for (var i = 0; i < particlesAmt; i++) {
+				this.emitter.emitParticle();
+			}
+
 			this.dashCooldown = 0;
 		} 
 		// Otherwise, just a regular movement to the left
@@ -90,8 +125,21 @@ Player.prototype.update = function(){
 		// test cooldown, test two consequent pushes, test is the pushes were wuick enough
 		if (this.secondRelease && this.dashCooldown >= this.dashCooldownTime && this.lastPressedRight > 0){
 			this.sprite.body.velocity.x += this.dashVelocity;
-			this.dashCooldown = 0;
 
+			// Set the velocity for the smoke to the left
+			this.maxParticleSpeed = new Phaser.Point(-300,200);
+  			this.minParticleSpeed = new Phaser.Point(-400,-200);
+			// Apply the velocity to the system
+    		this.emitter.x = 0;
+			this.emitter.maxParticleSpeed = this.maxParticleSpeed;
+	  		this.emitter.minParticleSpeed = this.minParticleSpeed;
+			// Emmit particles
+			particlesAmt = randomNumber (5, 10);
+			for (var i = 0; i < particlesAmt; i++) {
+				this.emitter.emitParticle();
+			}
+
+			this.dashCooldown = 0;
 		} 
 		// Otherwise, just a regular movement to the right
 		else {

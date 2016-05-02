@@ -33,7 +33,7 @@ function Enemy(hp, minYposition, maxYposition, dashCD){
 	// Shooting
 	this.shootCooldown = enemyShootingCD[0];
 	// Dash basic controls
-	this.dashVelocity = 4000;
+	this.dashVelocity = 500;
 	this.dashCooldownTime = dashCD;
 	this.dashCooldown;
 	// Dash particles stuff

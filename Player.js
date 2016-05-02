@@ -176,7 +176,6 @@ Player.prototype.update = function(){
 	// Save the Y position to prevent the player to be moved
 	this.lastY = this.sprite.body.position.y;
 }
-
 Player.prototype.shoot = function(){
 	// Try to shoot, but interrupt if cooldown is not complete
 	playerBullet.fire(this.getX()+(this.sprite.width/2 - 5), this.getY());

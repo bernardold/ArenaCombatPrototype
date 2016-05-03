@@ -33,7 +33,10 @@ function Enemy(hp, minYposition, maxYposition, dashCD){
 	// Shooting
 	this.shootCooldown = enemyShootingCD[0];
 	// Dash basic controls
-	this.dashVelocity = 500;
+	this.dashVelocity = 1000;
+	this.dashDurantionTime = 4;
+	this.dashDuration;
+	this.dashSide = 0;
 	this.dashCooldownTime = dashCD;
 	this.dashCooldown;
 	// Dash particles stuff
@@ -72,6 +75,7 @@ Enemy.prototype.create = function(){
 
 	// Initializing cooldowns
 	this.dashCooldown = this.dashCooldownTime;
+	this.dashDurantion = this.dashDurantionTime;
 	this.changeCooldown = this.changeCooldownTime;
 
 	enemyBullet.create(0,enemyBulletVelocity);
@@ -271,10 +275,11 @@ Enemy.prototype.processWallCollision = function(sprite, wall){
 Enemy.prototype.checkDash = function(obj1, obj2){
 	var particlesAmt;
 
+	// Start the dash movement
 	if (this.dashCooldown == this.dashCooldownTime){
+		this.dashSide = randomNumber(0,1);
 
-		var side = randomNumber(0,1);
-		if (side==0){	// Dash to the left
+		if (this.dashSide==0){	// Dash to the left
 			this.sprite.body.velocity.x -= this.dashVelocity;
 
 			// Set the velocity for the smoke to the right
@@ -283,7 +288,7 @@ Enemy.prototype.checkDash = function(obj1, obj2){
   			// Position the emitter on the right side of the sprite
     		this.emitter.x = this.sprite.width;
 		}
-		if (side==1){	// Dash to the right
+		if (this.dashSide==1){	// Dash to the right
 			this.sprite.body.velocity.x += this.dashVelocity;
 
 			// Set the velocity for the smoke to the left
@@ -302,9 +307,26 @@ Enemy.prototype.checkDash = function(obj1, obj2){
 			this.emitter.emitParticle();
 		}
 		
-
-		this.dashCooldown = 0
+		this.dashCooldown++;
+		this.dashDurantion = 1;
 	}
+	// Keep the dash movement after it started
+	else if (this.dashDurantion < this.dashDurantionTime){
+		if (this.dashSide==0){	// Dash to the left
+			this.sprite.body.velocity.x -= this.dashVelocity;
+		}
+		if (this.dashSide==1){	// Dash to the right
+			this.sprite.body.velocity.x += this.dashVelocity;
+		}
+
+		this.dashDurantion++;
+		// Reset the Dash cooldown when it ends
+		if (this.dashDurantion == this.dashDurantionTime) this.dashCooldown = 0;
+	}
+	else {
+		// Shouldn't dash cause of cooldown
+	}
+
 }
 
 Enemy.prototype.shoot = function(){

@@ -33,7 +33,10 @@ function Enemy(hp, minYposition, maxYposition, dashCD){
 	// Shooting
 	this.shootCooldown = enemyShootingCD[0];
 	// Dash basic controls
-	this.dashVelocity = 4000;
+	this.dashVelocity = 1000;
+	this.dashDurantionTime = 4;
+	this.dashDuration;
+	this.dashSide = 0;
 	this.dashCooldownTime = dashCD;
 	this.dashCooldown;
 	// Dash particles stuff
@@ -72,12 +75,13 @@ Enemy.prototype.create = function(){
 
 	// Initializing cooldowns
 	this.dashCooldown = this.dashCooldownTime;
+	this.dashDurantion = this.dashDurantionTime;
 	this.changeCooldown = this.changeCooldownTime;
 
 	enemyBullet.create(0,enemyBulletVelocity);
 
 	// Set the emitter for the dash
-	this.emitter = game.add.emitter(0, 0, 1000);
+	this.emitter = game.add.emitter(0, 0);
     this.emitter.makeParticles('smoke');
     // Attach it to the sprite
     this.sprite.addChild(this.emitter);
@@ -94,7 +98,7 @@ Enemy.prototype.create = function(){
 Enemy.prototype.update = function(){
 	// Updating control variables
 	// Updating cooldowns
-	enemyBullet.updateCooldown();
+	enemyBullet.update();
 	if (this.dashCooldown < this.dashCooldownTime) this.dashCooldown++;
  
 	// Level picking
@@ -271,23 +275,26 @@ Enemy.prototype.processWallCollision = function(sprite, wall){
 Enemy.prototype.checkDash = function(obj1, obj2){
 	var particlesAmt;
 
+	// Start the dash movement
 	if (this.dashCooldown == this.dashCooldownTime){
+		this.dashSide = randomNumber(0,1);
 
-		var side = randomNumber(0,1);
-		if (side==0){	// Dash to the left
+		if (this.dashSide==0){	// Dash to the left
 			this.sprite.body.velocity.x -= this.dashVelocity;
 
 			// Set the velocity for the smoke to the right
 			this.maxParticleSpeed = new Phaser.Point(400,200);
   			this.minParticleSpeed = new Phaser.Point(300,-200);
+  			// Position the emitter on the right side of the sprite
     		this.emitter.x = this.sprite.width;
 		}
-		if (side==1){	// Dash to the right
+		if (this.dashSide==1){	// Dash to the right
 			this.sprite.body.velocity.x += this.dashVelocity;
 
 			// Set the velocity for the smoke to the left
 			this.maxParticleSpeed = new Phaser.Point(-300,200);
   			this.minParticleSpeed = new Phaser.Point(-400,-200);
+  			// Position the emitter on the left side of the sprite
     		this.emitter.x = 0;
 		}
 
@@ -300,14 +307,31 @@ Enemy.prototype.checkDash = function(obj1, obj2){
 			this.emitter.emitParticle();
 		}
 		
-
-		this.dashCooldown = 0
+		this.dashCooldown++;
+		this.dashDurantion = 1;
 	}
+	// Keep the dash movement after it started
+	else if (this.dashDurantion < this.dashDurantionTime){
+		if (this.dashSide==0){	// Dash to the left
+			this.sprite.body.velocity.x -= this.dashVelocity;
+		}
+		if (this.dashSide==1){	// Dash to the right
+			this.sprite.body.velocity.x += this.dashVelocity;
+		}
+
+		this.dashDurantion++;
+		// Reset the Dash cooldown when it ends
+		if (this.dashDurantion == this.dashDurantionTime) this.dashCooldown = 0;
+	}
+	else {
+		// Shouldn't dash cause of cooldown
+	}
+
 }
 
 Enemy.prototype.shoot = function(){
 	// Try to shoot, but interrupt if cooldown is not complete
-	if (this.sprite.alive) enemyBullet.fire(this.getX()+(this.sprite.width/2 - 5), this.getY()+this.sprite.height);
+	if (this.sprite.alive) enemyBullet.fire(this.getX()+(this.sprite.width/2 - 5), this.getY()+this.sprite.height-10);
 }
 
 Enemy.prototype.damage = function (dam){

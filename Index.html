@@ -17,54 +17,54 @@
 	var combat;
 
 	// --- Obstacles
-	var obstaclesAmt = 3;
+	var obstaclesAmt = 3;			// Tells how many obstacles are going to show up on the screen
 	var obstacles = [];
 	var obstacleCollisionGroup; 	// The collision group for the walls
 	// Positioning
-	var obstaclesMinY = 250;
-	var obstaclesMaxY = 500;
+	var obstaclesMinY = 250;		// The highest place an obstacle can be positioned (recommended to be > 200)
+	var obstaclesMaxY = 500;		// The lowest place an obstacle can be positioned (recommended to be < 500)
 	// Size
-	var obstaclesMinWidth = 3;
-	var obstaclesMinHeight = 2;
-	var obstaclesMaxWidth = 9;
-	var obstaclesMaxHeight = 4;
+	var obstaclesMinWidth = 3;		// the minimum width which the wall are going to be generated (a unit is a 32x32px piece of wall)
+	var obstaclesMinHeight = 2;		// the minimum height which the wall are going to be generated (a unit is a 32x32px piece of wall)
+	var obstaclesMaxWidth = 9;		// the maximum width which the wall are going to be generated (a unit is a 32x32px piece of wall)
+	var obstaclesMaxHeight = 4;		// the maximum height which the wall are going to be generated (a unit is a 32x32px piece of wall)
 
 	// --- Heath Potion
 	var healthPotion; 		// The object
-	var HPamt = 5;
-	var HPheal = 25;
-	var HPcooldown = 100;
+	var HPamt = 5;			// How many Health Potions the user has
+	var HPheal = 25;		// How much a Health Potion heals
+	var HPcooldown = 100;	// Cooldown
 
 	// --- Player
 	var player; 			// The object
 	var playerHP;			// Life bar object
-	var playerYposition = 600;
-	var playerHealthPoints = 100;
-	var playerXvelocity = 240;
-	var playerShootingCD = 50;
-	var playerDashCD = 80;
+	var playerYposition = 600;			// The height on the screen where the player moves (distance relative to the top)
+	var playerHealthPoints = 100;		// How much health the player has
+	var playerXvelocity = 240;			// The speed of the player
+	var playerShootingCD = 50;			// The time the user has to wait between shots (in amount od iterations on the update loop)
+	var playerDashCD = 80;				// The cooldown of the dash for the player
 	// The player Bullet
 	var playerBulletType = "normal"; 	// This can assume the values: normal, fire, electric, acid, ice, or amor piercing  
-	var playerBulletSpread = 1;			// 1, 2, 4, 6, or 8
-	var playerBulletVelocity = -1200;
-	var playerBulletDamage = 1;
+	var playerBulletSpread = 1;			// How many bullets the player shoot at the same time (1, 2, 4, 6, or 8)
+	var playerBulletVelocity = -1200;	// The speed of the player's bullet (should be negative, cause it fires up)
+	var playerBulletDamage = 10;		// How much damage the player's bullet cause to the enemy
 
 	// --- Enemy
 	var enemy = []; 		// The object
 	var enemyHP;			// Life bar object
 	var enemyAmt = 1;			// TODO
-	var enemyHealthPoints = 12;
-	var enemyMinYPosition = 100;
-	var enemyMaxYPosition = 400;
+	var enemyHealthPoints = 100;					// How much health points each enemy has
+	var enemyMinYPosition = 100;					// How high on the screen each enemy can move (distance from the top)
+	var enemyMaxYPosition = 400;					// How low on the screen each enemy can move (distance from the top)
 	// The arrays refer to things that can change by the level of difficulty of the enemy
-	var enemyLvlChange = [80, 20, 0]; 	// The level is activated if life is bigger than __%
-	var enemyXvelocity = [120, 180, 240];
-	var enemyShootingCD = [50, 80, 200];
-	var enemyEvasion = [0, 1, 2]; 		// Refers to the level of evasion: 0: No evasion; 1: Dash; 2 - Dash + Defensive Movement
-	var enemyDashCD = 200;
+	var enemyLvlChange = [80, 20, 0]; 				// The level is activated if life is bigger than __%
+	var enemyXvelocity = [120, 180, 240];			// The speed of each enemy per level
+	var enemyShootingCD = [50, 80, 200];			// The time the enemies have to wait to shoot again, per level
+	var enemyEvasion = [0, 1, 2]; 					// Refers to the level of evasion: 0: No evasion; 1: Dash; 2: Dash + Defensive Movement
+	var enemyDashCD = 300;							// The cooldown of the dash
 	// The enemy Bullet
-	var enemyBulletDamage = 12;
-	var enemyBulletVelocity = 1200;
+	var enemyBulletDamage = 12;						// How much damage the enemy's bullet cause to the player
+	var enemyBulletVelocity = 1200;					// The speed of the enemy's bullet
 
 	$(document).ready(function(){
 		// Filling the text fields with default values
@@ -119,7 +119,240 @@
 		$("#enemyBulletDamage").val(enemyBulletDamage);
 		$("#enemyBulletVelocity").val(enemyBulletVelocity);
 
-	
+		// Set focus to the confirm button
+		// Faciltiate testing by just pressing enter when page loads
+		$('#play').focus();
+
+		// Write on the text area on the bottom of the page what each variable do on the game and how does it affect it
+		//Obstacles
+		$("#obstaclesAmt").hover(
+			function(){
+				$("#comments").val("Tells how many obstacles are going to show up on the screen");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+		$("#obstaclesMinY").hover(
+			function(){
+				$("#comments").val("The highest place an obstacle can be positioned (recommended to be > 200 so the enemy can move behind it)");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+		$("#obstaclesMaxY").hover(
+			function(){
+				$("#comments").val("The lowest place an obstacle can be positioned (recommended to be < 500 so the player can move under it)");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+		$("#obstaclesMinWidth").hover(
+			function(){
+				$("#comments").val("the minimum width which the wall are going to be generated (a unit is a 32x32px piece of wall)");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+		$("#obstaclesMinHeight").hover(
+			function(){
+				$("#comments").val("the minimum height which the wall are going to be generated (a unit is a 32x32px piece of wall)");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+		$("#obstaclesMaxWidth").hover(
+			function(){
+				$("#comments").val("the maximum width which the wall are going to be generated (a unit is a 32x32px piece of wall)");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+		$("#obstaclesMaxHeight").hover(
+			function(){
+				$("#comments").val("the maximum height which the wall are going to be generated (a unit is a 32x32px piece of wall)");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+
+		// Health Potions
+		$("#HPamt").hover(
+			function(){
+				$("#comments").val("How many Health Potions the user has");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+		$("#HPheal").hover(
+			function(){
+				$("#comments").val("How much a Health Potion heals");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+		$("#HPcooldown").hover(
+			function(){
+				$("#comments").val("Cooldown");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+
+		// Player
+		$("#playerYposition").hover(
+			function(){
+				$("#comments").val("The height on the screen where the player moves (distance relative to the top)");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+		$("#playerHealthPoints").hover(
+			function(){
+				$("#comments").val("CHow much health the player has");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+		$("#playerXvelocity").hover(
+			function(){
+				$("#comments").val("The speed of the player");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+		$("#playerShootingCD").hover(
+			function(){
+				$("#comments").val("The time the user has to wait between shots (in amount of iterations of the update loop)");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+		$("#playerDashCD").hover(
+			function(){
+				$("#comments").val("The cooldown of the dash for the player");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+		$("#playerBulletType").hover(
+			function(){
+				$("#comments").val("TODO\nThis can assume the values: normal, fire, electric, acid, ice, or amor piercing\nIt doesn't work yet though");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+		$("#playerBulletSpread").hover(
+			function(){
+				$("#comments").val("How many bullets the player shoot at the same time (1, 2, 4, 6, or 8). 6 and 8 feels too OP");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+		$("#playerBulletVelocity").hover(
+			function(){
+				$("#comments").val("The speed of the player's bullet (should be negative, cause it fires up)");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+		$("#playerBulletDamage").hover(
+			function(){
+				$("#comments").val("How much damage the player's bullet cause to the enemy");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+
+		// Enemy
+		$("#enemyAmt").hover(
+			function(){
+				$("#comments").val("TODO\nTells how many enemies are going to be spawned in the beginning.\nBut still has to be implemented");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+		$("#enemyHealthPoints").hover(
+			function(){
+				$("#comments").val("How much health each enemy has");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+		$("#enemyMinYPosition").hover(
+			function(){
+				$("#comments").val("How high on the screen each enemy can move (distance from the top)");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+		$("#enemyMaxYPosition").hover(
+			function(){
+				$("#comments").val("How low on the screen each enemy can move (distance from the top)");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+
+		$(".enemyLvlChange0, .enemyLvlChange1, .enemyLvlChange2").hover(
+			function(){
+				$("#comments").val("Each field refers to a difficulty level of the enemy\n\nThe level is activated if life is bigger than __%\nthe last level should be 0.");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+
+
+		$(".enemyXvelocity0, .enemyXvelocity1, .enemyXvelocity2").hover(
+			function(){
+				$("#comments").val("Each field refers to a difficulty level of the enemy\n\nThe speed of each enemy per level");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+
+
+		$(".enemyShootingCD0, .enemyShootingCD1, .enemyShootingCD2").hover(
+			function(){
+				$("#comments").val("Each field refers to a difficulty level of the enemy\n\nThe time the enemies have to wait to shoot again per level");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+
+
+		$(".enemyEvasion0, .enemyEvasion1, .enemyEvasion2").hover(
+			function(){
+				$("#comments").val("Each field refers to a difficulty level of the enemy\n\nRefers to the level of evasion:\n0 - No evasion;\n1 - Dash;\n2 - Dash + Defensive Movement");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+
+
+		$("#enemyDashCD").hover(
+			function(){
+				$("#comments").val("The cooldown of the dash");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+		$("#enemyBulletDamage").hover(
+			function(){
+				$("#comments").val("How much damage the enemy's bullet cause to the player");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+		$("#enemyBulletVelocity").hover(
+			function(){
+				$("#comments").val("The speed of the enemy's bullet (here it's positive cause the enemy shoots down)");
+			}, function(){
+				$("#comments").val("");
+			}
+		);
+
+
+
 		// Listener to start the game
 		$('#play').on('click',function() {
 			//console.log("submit");
@@ -147,9 +380,8 @@
 			playerShootingCD = parseInt($("#playerShootingCD").val());
 			playerDashCD = parseInt($("#playerDashCD").val());
 			// The player Bullet
-			playerBulletType = $("#playerBulletType").val();	// This can assume the values: normal, fire, electric, acid, ice, or amor piercing  
+			playerBulletType = $("#playerBulletType").val();	// This can assume the values: normal, fire, electric, acid, ice, or aPiercing  
 			playerBulletSpread = $("#playerBulletSpread").val();			// 1, 2, 4, 6, or 8
-			console.log(playerBulletSpread);
 			playerBulletVelocity = parseInt($("#playerBulletVelocity").val());
 			playerBulletDamage = parseInt($("#playerBulletDamage").val());
 
@@ -221,7 +453,7 @@
 							<option value="electric">electric</option>
 							<option value="acid">acid</option>
 							<option value="ice">ice</option>
-							<option value="amor piercing">amor piercing</option>
+							<option value="aPiercing">armor piercing</option>
 						</select><br>
 				Spread <select id="playerBulletSpread">
 							<option value="1">1</option>
@@ -251,6 +483,10 @@
 				
 
 			<button id="play">Play</button>
+
+
+			<br><br><br>
+			<textarea id="comments" cols="80" rows= "10" readonly="true"></textarea>
 
 	</div>
 

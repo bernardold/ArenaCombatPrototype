@@ -68,7 +68,7 @@ Player.prototype.update = function(){
 
 	// Updating control variables
 	// Updating cooldowns
-	playerBullet.updateCooldown();
+	playerBullet.update();
 	if (this.dashCooldown < this.dashCooldownTime) this.dashCooldown++;
 	// Updating timers
 	if (this.lastPressedLeft > 0) this.lastPressedLeft--;
@@ -176,10 +176,9 @@ Player.prototype.update = function(){
 	// Save the Y position to prevent the player to be moved
 	this.lastY = this.sprite.body.position.y;
 }
-
 Player.prototype.shoot = function(){
 	// Try to shoot, but interrupt if cooldown is not complete
-	playerBullet.fire(this.getX()+(this.sprite.width/2 - 5), this.getY()-this.sprite.height);
+	playerBullet.fire(this.getX()+(this.sprite.width/2 - 5), this.getY());
 }
 
 Player.prototype.damage = function (dam){

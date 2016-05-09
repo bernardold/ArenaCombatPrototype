@@ -81,7 +81,7 @@ Enemy.prototype.create = function(){
 	enemyBullet.create(0,enemyBulletVelocity);
 
 	// Set the emitter for the dash
-	this.emitter = game.add.emitter(0, 0, 1000);
+	this.emitter = game.add.emitter(0, 0);
     this.emitter.makeParticles('smoke');
     // Attach it to the sprite
     this.sprite.addChild(this.emitter);
@@ -98,7 +98,7 @@ Enemy.prototype.create = function(){
 Enemy.prototype.update = function(){
 	// Updating control variables
 	// Updating cooldowns
-	enemyBullet.updateCooldown();
+	enemyBullet.update();
 	if (this.dashCooldown < this.dashCooldownTime) this.dashCooldown++;
  
 	// Level picking

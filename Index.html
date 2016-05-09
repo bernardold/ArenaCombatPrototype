@@ -380,9 +380,8 @@
 			playerShootingCD = parseInt($("#playerShootingCD").val());
 			playerDashCD = parseInt($("#playerDashCD").val());
 			// The player Bullet
-			playerBulletType = $("#playerBulletType").val();	// This can assume the values: normal, fire, electric, acid, ice, or amor piercing  
+			playerBulletType = $("#playerBulletType").val();	// This can assume the values: normal, fire, electric, acid, ice, or aPiercing  
 			playerBulletSpread = $("#playerBulletSpread").val();			// 1, 2, 4, 6, or 8
-			console.log(playerBulletSpread);
 			playerBulletVelocity = parseInt($("#playerBulletVelocity").val());
 			playerBulletDamage = parseInt($("#playerBulletDamage").val());
 
@@ -454,7 +453,7 @@
 							<option value="electric">electric</option>
 							<option value="acid">acid</option>
 							<option value="ice">ice</option>
-							<option value="amor piercing">amor piercing</option>
+							<option value="aPiercing">armor piercing</option>
 						</select><br>
 				Spread <select id="playerBulletSpread">
 							<option value="1">1</option>

@@ -68,7 +68,7 @@ Player.prototype.update = function(){
 
 	// Updating control variables
 	// Updating cooldowns
-	playerBullet.updateCooldown();
+	playerBullet.update();
 	if (this.dashCooldown < this.dashCooldownTime) this.dashCooldown++;
 	// Updating timers
 	if (this.lastPressedLeft > 0) this.lastPressedLeft--;
